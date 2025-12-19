@@ -1,26 +1,20 @@
-// Backend mínimo VetAgro AI
-// Este servidor existe apenas para:
-// - Criar assinaturas no Mercado Pago
-// - Receber webhooks
-// - Proteger as chaves (Access Token)
-
 const express = require("express");
 const mercadopago = require("mercadopago");
 
 const app = express();
 app.use(express.json());
 
-// ⚠️ O Access Token será configurado depois no ambiente (Vercel)
+// Configura Mercado Pago com variável de ambiente
 mercadopago.configure({
   access_token: process.env.MP_ACCESS_TOKEN,
 });
 
-// Rota de teste (para saber se o backend está vivo)
+// Rota de teste
 app.get("/", (req, res) => {
   res.send("Backend VetAgro AI ativo 🚀");
 });
 
-// Criar assinatura Mercado Pago
+// Criar assinatura
 app.post("/criar-assinatura", async (req, res) => {
   try {
     const { email } = req.body;
@@ -46,7 +40,5 @@ app.post("/criar-assinatura", async (req, res) => {
   }
 });
 
-// Porta exigida pela Vercel
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Servidor rodando na porta", PORT);
+// 🔴 IMPORTANTE PARA A VERCEL
+module.exports = app;
