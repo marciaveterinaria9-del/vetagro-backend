@@ -1,44 +1,57 @@
-const express = require("express");
-const mercadopago = require("mercadopago");
+const express = require('express');
+const { MercadoPagoConfig, PreApproval } = require('mercadopago');
 
 const app = express();
 app.use(express.json());
 
-// Configura Mercado Pago com variável de ambiente
-mercadopago.configure({
-  access_token: process.env.MP_ACCESS_TOKEN,
+// Configuração do Mercado Pago
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN
 });
 
-// Rota de teste
-app.get("/", (req, res) => {
-  res.send("Backend VetAgro AI ativo 🚀");
+const preApproval = new PreApproval(client);
+
+// Health check
+app.get('/', (req, res) => {
+  res.send('Backend VetAgro AI ativo 🚀');
 });
 
-// Criar assinatura
-app.post("/criar-assinatura", async (req, res) => {
+// Criar assinatura recorrente
+app.post('/criar-assinatura', async (req, res) => {
   try {
     const { email } = req.body;
 
-    const subscription = await mercadopago.preapproval.create({
-      payer_email: email,
-      reason: "VetAgro AI - Plano Pro",
-      auto_recurring: {
-        frequency: 1,
-        frequency_type: "months",
-        transaction_amount: 49.9,
-        currency_id: "BRL",
-      },
-      back_url: "https://app.vetagroai.com.br",
+    if (!email) {
+      return res.status(400).json({ error: 'Email é obrigatório' });
+    }
+
+    const subscription = await preApproval.create({
+      body: {
+        reason: 'Assinatura VetAgro AI Pro',
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: 'months',
+          transaction_amount: 49.90,
+          currency_id: 'BRL'
+        },
+        payer_email: email,
+        back_url: 'https://app.vetagroai.com.br/assinatura-confirmada',
+        status: 'pending'
+      }
     });
 
     res.json({
-      init_point: subscription.body.init_point,
+      success: true,
+      init_point: subscription.init_point,
+      id: subscription.id
     });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Erro ao criar assinatura" });
+    console.error('Erro ao criar assinatura:', error);
+    res.status(500).json({
+      error: 'Erro ao criar assinatura',
+      details: error.message
+    });
   }
 });
 
-// 🔴 IMPORTANTE PARA A VERCEL
 module.exports = app;
