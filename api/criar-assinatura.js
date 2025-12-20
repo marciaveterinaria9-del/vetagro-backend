@@ -36,7 +36,10 @@ export default async function handler(req, res) {
       init_point: response.init_point
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Erro ao criar assinatura" });
-  }
+  console.error("Erro Mercado Pago:", error);
+
+  return res.status(500).json({
+    error: "Erro ao criar assinatura",
+    detalhes: error.message || error
+  });
 }
