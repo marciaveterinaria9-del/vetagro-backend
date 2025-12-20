@@ -1,15 +1,15 @@
-const { MercadoPagoConfig, PreApproval } = require("mercadopago");
+import { MercadoPagoConfig, PreApproval } from "mercadopago";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Método não permitido" });
+    return res.status(405).json({ erro: "Método não permitido" });
   }
 
   try {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ error: "Email é obrigatório" });
+      return res.status(400).json({ erro: "Email é obrigatório" });
     }
 
     const client = new MercadoPagoConfig({
@@ -27,20 +27,19 @@ export default async function handler(req, res) {
         transaction_amount: 29.9,
         currency_id: "BRL"
       },
-      back_url: "https://vetagro.ai/obrigado",
-      status: "pending"
+      return_url: "https://vetagro.ai/obrigado"
     });
 
     return res.status(200).json({
-      message: "Assinatura criada com sucesso",
-      init_point: response.init_point
+      mensagem: "Assinatura criada com sucesso",
+      link_pagamento: response.init_point
     });
 
-  } catch (error) {
-    console.error("Erro Mercado Pago:", error);
+  } catch (erro) {
+    console.error("Erro Mercado Pago:", erro);
     return res.status(500).json({
-      error: "Erro ao criar assinatura",
-      detalhes: error.message || error
+      erro: "Erro ao criar assinatura",
+      detalhes: erro.message
     });
   }
 }
