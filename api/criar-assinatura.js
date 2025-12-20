@@ -1,8 +1,8 @@
-import { MercadoPagoConfig, PreApproval } from "mercadopago";
+const { MercadoPagoConfig, PreApproval } = require("mercadopago");
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({ error: "Método não permitido" });
   }
 
   try {
@@ -35,11 +35,12 @@ export default async function handler(req, res) {
       message: "Assinatura criada com sucesso",
       init_point: response.init_point
     });
-  } catch (error) {
-  console.error("Erro Mercado Pago:", error);
 
-  return res.status(500).json({
-    error: "Erro ao criar assinatura",
-    detalhes: error.message || error
-  });
+  } catch (error) {
+    console.error("Erro Mercado Pago:", error);
+    return res.status(500).json({
+      error: "Erro ao criar assinatura",
+      detalhes: error.message || error
+    });
+  }
 }
